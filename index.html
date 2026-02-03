@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnapPwd - Secure One-Time Secrets</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="env.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SnapPwd 🔒</h1>
+            <p>End-to-end encrypted, one-time secret sharing.</p>
+        </header>
+
+        <main>
+            <!-- ERROR BOX -->
+            <div id="error-box" class="hidden error"></div>
+
+            <!-- CREATE VIEW -->
+            <section id="view-create">
+                <div class="input-group">
+                    <label for="secret-content">Secret Content</label>
+                    <textarea id="secret-content" placeholder="Paste your password, private key, or secret message here..."></textarea>
+                </div>
+                
+                <div class="settings">
+                    <div class="input-group">
+                        <label for="expiration">Expires after</label>
+                        <select id="expiration">
+                            <option value="3600">1 Hour</option>
+                            <option value="86400" selected>1 Day</option>
+                            <option value="604800">1 Week</option>
+                        </select>
+                    </div>
+                    <!-- Future: Password protection, max views (default 1) -->
+                </div>
+
+                <button id="btn-encrypt" class="primary-btn">Encrypt & Create Link</button>
+            </section>
+
+            <!-- RESULT VIEW -->
+            <section id="view-result" class="hidden">
+                <div class="success-message">
+                    <h3>Secret Created!</h3>
+                    <p>Share this link. It will work only once (or until expiration).</p>
+                </div>
+                <div class="link-display">
+                    <input type="text" id="share-link" readonly>
+                    <button id="btn-copy">Copy</button>
+                </div>
+                <button id="btn-reset" class="secondary-btn">Create Another</button>
+            </section>
+
+            <!-- READ VIEW -->
+            <section id="view-read" class="hidden">
+                <div id="read-loading">
+                    <p>Fetching and decrypting secret...</p>
+                    <div class="spinner"></div>
+                </div>
+                
+                <div id="read-content" class="hidden">
+                    <div class="warning-banner">
+                        ⚠️ This secret has been revealed. It is now burned from the server.
+                    </div>
+                    <label>Decrypted Secret:</label>
+                    <pre id="decrypted-text"></pre>
+                    <button id="btn-copy-secret" class="secondary-btn">Copy Secret</button>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Host your own <a href="https://github.com/snappwd/snappwd">SnapPwd</a></p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
