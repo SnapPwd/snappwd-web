@@ -1,73 +1,67 @@
-# React + TypeScript + Vite
+# SnapPwd Self-Hosted Web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A minimal, static web frontend for self-hosting [SnapPwd](https://github.com/snappwd/snappwd). Built with Vite, React, TypeScript, and Tailwind CSS.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Client-side encryption (AES-256-GCM)
+- Text and File sharing
+- Zero-knowledge architecture (server never sees the key)
+- Simple Docker deployment
 
-## React Compiler
+## Prerequisites
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js 20+ (for development)
+- Docker & Docker Compose (for deployment)
+- A running instance of `snappwd-service`
 
-## Expanding the ESLint configuration
+## Development
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+2. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+   By default, it expects the API at `/api`. To proxy to a local backend running on port 8080, update `vite.config.ts` or set the env var:
+   ```bash
+   VITE_API_URL=http://localhost:8080 npm run dev
+   ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Deployment with Docker
+
+### 1. Build & Run
+You can use the included `docker-compose.yml` to spin up the full stack (Web + API + Redis).
+
+```bash
+docker-compose up -d
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Configuration
+The frontend connects to the backend via `VITE_API_URL`. Since this is a static build, the URL is baked in at build time.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+**To change the API URL:**
+Rebuild the image with a build argument:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+docker build --build-arg VITE_API_URL=https://api.yourdomain.com -t snappwd-web .
 ```
+
+Or update the `docker-compose.yml`:
+
+```yaml
+services:
+  web:
+    build:
+      context: .
+      args:
+        - VITE_API_URL=https://api.yourdomain.com
+```
+
+## Security
+
+This application performs all encryption and decryption in the browser using the Web Crypto API. The encryption key is part of the URL hash fragment (`#id_key`) and is never sent to the server.
