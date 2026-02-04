@@ -117,6 +117,20 @@ button {
     margin-bottom: 20px;
 }
 
+.confirm-message {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.confirm-message h3 {
+    margin: 0 0 10px 0;
+}
+
+.confirm-message p {
+    color: var(--text-color);
+    margin: 0;
+}
+
 .error {
     background: #f8d7da;
     color: #721c24;
@@ -154,3 +168,23 @@ footer {
 }
 
 footer a { color: var(--primary-color); text-decoration: none; }
+
+/* Spinner */
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

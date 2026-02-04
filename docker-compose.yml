@@ -1,33 +1,31 @@
 version: '3.8'
 
 services:
-  # Frontend
+  # The Frontend (This Repo)
   web:
-    build: 
-      context: .
-      # To change the API URL at build time:
-      # args:
-      #   VITE_API_URL: https://api.example.com
+    build: .
     ports:
-      - "3000:80"
+      - "80:80"
+    environment:
+      - API_URL=http://localhost:8080
     depends_on:
       - api
 
-  # Backend Service
+  # The Backend Service
+  # Assuming the image is available as snappwd/service or built from context
+  # If you are running this from the root of the monorepo, you might adjust the build context
   api:
-    # Assuming you have the service image or build it locally
-    # build: ../snappwd-service 
-    image: snappwd/snappwd-service:latest 
+    image: snappwd/snappwd-service:latest
+    # build: ../snappwd-service  <-- Uncomment if building locally
     ports:
       - "8080:8080"
     environment:
       - REDIS_URL=redis://redis:6379
       - PORT=8080
-      # Add other service config here
     depends_on:
       - redis
 
-  # Database
+  # Redis for storage
   redis:
     image: redis:alpine
     volumes:

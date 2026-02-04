@@ -4,8 +4,8 @@ const API_URL = window.config?.API_URL || 'http://localhost:8080';
 
 // App State
 const state = {
-    key: null, // CryptoKey
-    id: null
+    id: null,
+    keyString: null
 };
 
 // Base64 Helpers
@@ -91,6 +91,7 @@ async function decrypt(encryptedBase64, key) {
 
 // UI Handlers
 async function handleCreate() {
+    clearError();
     const content = $('secret-content').value;
     const expiration = parseInt($('expiration').value);
 
@@ -99,16 +100,20 @@ async function handleCreate() {
         return;
     }
 
+    const btn = $('btn-encrypt');
+    btn.disabled = true;
+    btn.textContent = 'Encrypting...';
+
     try {
         const key = await generateKey();
         const encrypted = await encrypt(content, key);
         
         // POST to API
-        const response = await fetch(`${API_URL}/api/v1/secret`, {
+        const response = await fetch(`${API_URL}/v1/secrets`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                encrypted_content: encrypted,
+                encryptedSecret: encrypted,
                 expiration: expiration
             })
         });
@@ -120,7 +125,8 @@ async function handleCreate() {
         
         // Construct Link
         // Current logic: use hash for key so it's not sent to server
-        const shareUrl = `${window.location.origin}${window.location.pathname}?id=${data.id}#key=${keyString}`;
+        const secretId = data.id || data.secretId;
+        const shareUrl = `${window.location.origin}${window.location.pathname}?id=${secretId}#key=${encodeURIComponent(keyString)}`;
         
         $('share-link').value = shareUrl;
         
@@ -130,35 +136,55 @@ async function handleCreate() {
     } catch (e) {
         showError(e.message);
         console.error(e);
+    } finally {
+        const btn = $('btn-encrypt');
+        btn.disabled = false;
+        btn.textContent = 'Encrypt & Create Link';
     }
 }
 
-async function handleRead(id) {
-    $('view-create').classList.add('hidden');
-    $('view-read').classList.remove('hidden');
+function handleRead(id) {
+    clearError();
+    // Validate ID format
+    if (!/^[a-zA-Z0-9_-]+$/.test(id)) {
+        showError("Invalid secret ID.");
+        return;
+    }
 
-    // Get key from hash
+    // Validate key exists before showing confirm
     const hash = window.location.hash;
     const keyString = new URLSearchParams(hash.substring(1)).get('key');
 
     if (!keyString) {
         showError("Encryption key missing from URL.");
-        $('read-loading').classList.add('hidden');
         return;
     }
 
+    // Store for reveal
+    state.id = id;
+    state.keyString = keyString;
+
+    // Show confirm view
+    $('view-create').classList.add('hidden');
+    $('view-confirm').classList.remove('hidden');
+}
+
+async function revealSecret() {
+    $('view-confirm').classList.add('hidden');
+    $('view-read').classList.remove('hidden');
+
     try {
-        const response = await fetch(`${API_URL}/api/v1/secret/${id}`);
-        
+        const response = await fetch(`${API_URL}/v1/secrets/${state.id}`);
+
         if (response.status === 404) {
             throw new Error("Secret not found or already viewed.");
         }
-        
+
         if (!response.ok) throw new Error("Failed to fetch secret.");
 
         const data = await response.json();
-        const key = await importKey(keyString);
-        const decrypted = await decrypt(data.encrypted_content, key);
+        const key = await importKey(state.keyString);
+        const decrypted = await decrypt(data.encryptedSecret, key);
 
         $('read-loading').classList.add('hidden');
         $('read-content').classList.remove('hidden');
@@ -181,11 +207,10 @@ function init() {
 
     // Event Listeners
     $('btn-encrypt').addEventListener('click', handleCreate);
+    $('btn-reveal').addEventListener('click', revealSecret);
     
     $('btn-copy').addEventListener('click', () => {
-        const el = $('share-link');
-        el.select();
-        document.execCommand('copy');
+        navigator.clipboard.writeText($('share-link').value);
         $('btn-copy').textContent = 'Copied!';
         setTimeout(() => $('btn-copy').textContent = 'Copy', 2000);
     });
@@ -205,6 +230,10 @@ function showError(msg) {
     const el = $('error-box');
     el.textContent = msg;
     el.classList.remove('hidden');
+}
+
+function clearError() {
+    $('error-box').classList.add('hidden');
 }
 
 document.addEventListener('DOMContentLoaded', init);

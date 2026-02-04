@@ -53,13 +53,22 @@
                 <button id="btn-reset" class="secondary-btn">Create Another</button>
             </section>
 
+            <!-- CONFIRM VIEW -->
+            <section id="view-confirm" class="hidden">
+                <div class="confirm-message">
+                    <h3>You're about to reveal a secret</h3>
+                    <p>This is a one-time secret. Once revealed, it will be <strong>permanently deleted</strong> from the server and cannot be viewed again.</p>
+                </div>
+                <button id="btn-reveal" class="primary-btn">Reveal Secret</button>
+            </section>
+
             <!-- READ VIEW -->
             <section id="view-read" class="hidden">
                 <div id="read-loading">
-                    <p>Fetching and decrypting secret...</p>
+                    <p>Decrypting secret...</p>
                     <div class="spinner"></div>
                 </div>
-                
+
                 <div id="read-content" class="hidden">
                     <div class="warning-banner">
                         ⚠️ This secret has been revealed. It is now burned from the server.
