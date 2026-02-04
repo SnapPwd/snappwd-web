@@ -1,83 +1,89 @@
 # SnapPwd Self-Hosted Web
 
-A minimal, static web frontend for self-hosting [SnapPwd](https://github.com/snappwd/snappwd). Built with Vite, React, TypeScript, and Tailwind CSS.
+The official self-hosted web frontend for [SnapPwd](https://snappwd.io).
+
+This is a lightweight, static Single Page Application (SPA) built with Vite, React, and Tailwind CSS. It is designed to work with the [snappwd-service](https://github.com/SnapPwd/snappwd-service) backend.
 
 ## Features
 
-- Client-side encryption (AES-256-GCM)
-- Text and File sharing
-- Zero-knowledge architecture (server never sees the key)
-- Simple Docker deployment
+- **Zero-Knowledge Architecture**: Encryption happens in the browser using the Web Crypto API (AES-GCM). The server never sees the key.
+- **Secure Sharing**: Create one-time links for secrets and files.
+- **Minimalist**: Fast, simple UI focusing on speed and security.
 
 ## Prerequisites
 
-- Node.js 20+ (for development)
-- Docker & Docker Compose (for deployment)
-- A running instance of `snappwd-service`
+To run a full self-hosted instance, you need:
+
+1. **SnapPwd Web** (This repo).
+2. **[SnapPwd Service](https://github.com/SnapPwd/snappwd-service)** - The backend API.
+3. **Redis** - For data storage.
+
+## Quick Start (Docker Compose)
+
+The included `docker-compose.yml` is configured to build the backend service from a **sibling directory**.
+
+1. **Clone both repositories**:
+   ```bash
+   # Create a folder for the project
+   mkdir snappwd-selfhosted && cd snappwd-selfhosted
+
+   # Clone the frontend (this repo)
+   git clone https://github.com/SnapPwd/snappwd-web.git
+
+   # Clone the backend (sibling)
+   git clone https://github.com/SnapPwd/snappwd-service.git
+   ```
+
+   Structure:
+   ```
+   snappwd-selfhosted/
+   ├── snappwd-web/
+   └── snappwd-service/
+   ```
+
+2. **Start the stack**:
+   ```bash
+   cd snappwd-web
+   docker compose up -d
+   ```
+
+Access the app at `http://localhost:3000`.
 
 ## Development
 
-1. Install dependencies:
+1. **Install dependencies**:
    ```bash
    npm install
    ```
 
-2. Start the development server:
+2. **Start the dev server**:
    ```bash
-   npm run dev
-   ```
-
-   By default, it expects the API at `/api`. To proxy to a local backend running on port 8080, update `vite.config.ts` or set the env var:
-   ```bash
+   # Point to your local API service
    VITE_API_URL=http://localhost:8080 npm run dev
    ```
 
-## Deployment with Docker
+## Configuration
 
-### 1. Clone the Backend Service
-The `docker-compose.yml` builds the backend from a local checkout. Clone `snappwd-service` as a sibling directory:
+The frontend is a static site. The API URL must be known at **build time** (baked into the JS bundle).
 
-```bash
-cd ..
-git clone https://github.com/snappwd/snappwd-service.git
-cd snappwd-web
-```
+### Build Args
 
-Your directory structure should look like:
-```
-parent-directory/
-├── snappwd-web/        # this repo
-└── snappwd-service/    # backend service
-```
-
-### 2. Build & Run
-Use the included `docker-compose.yml` to spin up the full stack (Web + API + Redis):
+| Build Arg | Description | Default |
+|-----------|-------------|---------|
+| `VITE_API_URL` | The public URL of your `snappwd-service` instance. | `http://localhost:8080` |
 
 ```bash
-docker compose up -d
+docker build --build-arg VITE_API_URL=https://api.your-company.com -t snappwd-web .
 ```
 
-### 3. Configuration
-The frontend connects to the backend via `VITE_API_URL`. Since this is a static build, the URL is baked in at build time.
+## Security Model
 
-**To change the API URL:**
-Rebuild the image with a build argument:
+1. **Browser**: Generates a random AES encryption key.
+2. **Encrypt**: Data is encrypted locally (Web Crypto API).
+3. **Upload**: Only the *ciphertext* is sent to the API.
+4. **Share**: The URL contains the `id` (path) and the `key` (hash fragment).
+   - **Important**: Hash fragments (`#key=...`) are **never** sent to the server.
 
-```bash
-docker build --build-arg VITE_API_URL=https://api.yourdomain.com -t snappwd-web .
-```
+## License
 
-Or update the `docker-compose.yml`:
-
-```yaml
-services:
-  web:
-    build:
-      context: .
-      args:
-        - VITE_API_URL=https://api.yourdomain.com
-```
-
-## Security
-
-This application performs all encryption and decryption in the browser using the Web Crypto API. The encryption key is part of the URL hash fragment (`#id_key`) and is never sent to the server.
+MIT
