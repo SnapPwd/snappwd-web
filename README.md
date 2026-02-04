@@ -2,13 +2,14 @@
 
 The official self-hosted web frontend for [SnapPwd](https://snappwd.io).
 
-This is a lightweight, static Single Page Application (SPA) built with Vite, React, and Tailwind CSS. It is designed to work with the [snappwd-service](https://github.com/SnapPwd/snappwd-service) backend.
+This is a lightweight, static Single Page Application (SPA) built with **zero-dependency HTML, CSS, and JavaScript**. It is designed to work with the [snappwd-service](https://github.com/SnapPwd/snappwd-service) backend.
 
 ## Features
 
 - **Zero-Knowledge Architecture**: Encryption happens in the browser using the Web Crypto API (AES-GCM). The server never sees the key.
 - **Secure Sharing**: Create one-time links for secrets and files.
 - **Minimalist**: Fast, simple UI focusing on speed and security.
+- **No Build Step**: Pure static files. Modify and run instantly.
 
 ## Prerequisites
 
@@ -51,29 +52,46 @@ Access the app at `http://localhost:3000`.
 
 ## Development
 
-1. **Install dependencies**:
+Since this project uses vanilla HTML/JS, there is no build step or package installation required.
+
+1. **Configure Environment**:
+   Copy the example config and adjust the API URL if needed.
    ```bash
-   npm install
+   cp env.js.example env.js
    ```
 
-2. **Start the dev server**:
+2. **Serve the app**:
+   You can use any static file server.
    ```bash
-   # Point to your local API service
-   VITE_API_URL=http://localhost:8080 npm run dev
+   # Using npx (Node.js)
+   npx serve .
+
+   # Or Python
+   python3 -m http.server 3000
    ```
+
+3. **Visit**: `http://localhost:3000`
 
 ## Configuration
 
-The frontend is a static site. The API URL must be known at **build time** (baked into the JS bundle).
+Configuration is handled at runtime via `env.js`.
 
-### Build Args
+### Environment Variables (Docker)
 
-| Build Arg | Description | Default |
-|-----------|-------------|---------|
-| `VITE_API_URL` | The public URL of your `snappwd-service` instance. | `http://localhost:8080` |
+When running via Docker, environment variables are injected into `env.js` at startup.
 
-```bash
-docker build --build-arg VITE_API_URL=https://api.your-company.com -t snappwd-web .
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `API_URL` | The public URL of your `snappwd-service` instance. | `http://localhost:8080` (in `env.js.example`) |
+
+### Manual Configuration
+
+If not using Docker, simply edit `env.js`:
+
+```javascript
+window.config = {
+    API_URL: "https://api.your-snappwd-instance.com"
+};
 ```
 
 ## Security Model
