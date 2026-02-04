@@ -12,11 +12,9 @@ services:
       - api
 
   # The Backend Service
-  # Assuming the image is available as snappwd/service or built from context
-  # If you are running this from the root of the monorepo, you might adjust the build context
+  # Make sure snappwd-service repo is cloned and in the same directory of snappwd-web
   api:
-    image: snappwd/snappwd-service:latest
-    # build: ../snappwd-service  <-- Uncomment if building locally
+    build: ../snappwd-service
     ports:
       - "8080:8080"
     environment:

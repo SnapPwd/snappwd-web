@@ -34,14 +34,30 @@ A minimal, static web frontend for self-hosting [SnapPwd](https://github.com/sna
 
 ## Deployment with Docker
 
-### 1. Build & Run
-You can use the included `docker-compose.yml` to spin up the full stack (Web + API + Redis).
+### 1. Clone the Backend Service
+The `docker-compose.yml` builds the backend from a local checkout. Clone `snappwd-service` as a sibling directory:
 
 ```bash
-docker-compose up -d
+cd ..
+git clone https://github.com/snappwd/snappwd-service.git
+cd snappwd-web
 ```
 
-### 2. Configuration
+Your directory structure should look like:
+```
+parent-directory/
+├── snappwd-web/        # this repo
+└── snappwd-service/    # backend service
+```
+
+### 2. Build & Run
+Use the included `docker-compose.yml` to spin up the full stack (Web + API + Redis):
+
+```bash
+docker compose up -d
+```
+
+### 3. Configuration
 The frontend connects to the backend via `VITE_API_URL`. Since this is a static build, the URL is baked in at build time.
 
 **To change the API URL:**
