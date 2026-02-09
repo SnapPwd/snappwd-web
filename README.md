@@ -1,5 +1,7 @@
 # SnapPwd Self-Hosted Web
 
+[![Live App](https://img.shields.io/badge/Live_App-snappwd.io-00C853?style=for-the-badge&logo=appveyor)](https://snappwd.io)
+
 The official self-hosted web frontend for [SnapPwd](https://snappwd.io).
 
 This is a lightweight, static Single Page Application (SPA) built with **zero-dependency HTML, CSS, and JavaScript**. It is designed to work with the [snappwd-service](https://github.com/SnapPwd/snappwd-service) backend.
