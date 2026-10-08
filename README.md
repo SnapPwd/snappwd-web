@@ -24,7 +24,7 @@ docker compose up -d
 
 Open `http://localhost` to use the app. The API is published on `http://localhost:8080`.
 
-The browser calls the API at the address in `API_URL`, which `docker-compose.yml` sets to `http://localhost:8080`. To reach the instance from another machine, change `API_URL` to an address that machine can resolve. The [self-hosting guide](https://www.snappwd.io/docs/self-hosting) covers the full stack, and the [snappwd-service README](https://github.com/SnapPwd/snappwd-service#abuse-protection-and-rollout) covers what to configure before exposing an instance publicly.
+The browser calls the API at the address in `API_URL`, which `docker-compose.yml` sets to `http://localhost:8080`. To use the instance from another machine, changing `API_URL` to an address that machine can resolve is not enough: the app encrypts with the Web Crypto API, which browsers only expose on HTTPS pages (`http://localhost` is the one exception). Serve both the web app and the API over HTTPS, for example behind a TLS-terminating reverse proxy, and set `API_URL` to the API's `https://` address; an HTTPS page cannot call an `http://` API. For development, a tunnel that makes the instance reachable as `localhost` on your machine (such as SSH port forwarding of both ports) also works. The [self-hosting guide](https://www.snappwd.io/docs/self-hosting) covers the full stack, and the [snappwd-service README](https://github.com/SnapPwd/snappwd-service#abuse-protection-and-rollout) covers what to configure before exposing an instance publicly.
 
 ## Features
 
@@ -87,7 +87,7 @@ window.config = {
 1. **Browser**: Generates a random AES encryption key.
 2. **Encrypt**: Data is encrypted locally (Web Crypto API).
 3. **Upload**: Only the *ciphertext* is sent to the API.
-4. **Share**: The URL contains the `id` (path) and the `key` (hash fragment).
+4. **Share**: The URL contains the `id` (query string, `?id=...`) and the `key` (hash fragment).
    - **Important**: Hash fragments (`#key=...`) are **never** sent to the server.
 
 ## License
