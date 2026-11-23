@@ -2,10 +2,15 @@
 
 [![Live App](https://img.shields.io/badge/Live_App-snappwd.io-00C853?style=for-the-badge&logo=appveyor)](https://snappwd.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
+[![GitHub release](https://img.shields.io/github/v/release/SnapPwd/snappwd-web?style=for-the-badge)](https://github.com/SnapPwd/snappwd-web/releases)
 
 The official self-hosted web frontend for [SnapPwd](https://snappwd.io).
 
 This is a lightweight, static Single Page Application (SPA) built with **zero-dependency HTML, CSS, and JavaScript**. It is designed to work with the [snappwd-service](https://github.com/SnapPwd/snappwd-service) backend.
+
+![Create-secret screen with demo text, a one-day expiration and the Encrypt & Create Link button](docs/create-secret.png)
+
+The screenshot uses demo text only; no secret was submitted.
 
 ## Try it
 
@@ -25,6 +30,25 @@ docker compose up -d
 Open `http://localhost` to use the app. The API is published on `http://localhost:8080`.
 
 The browser calls the API at the address in `API_URL`, which `docker-compose.yml` sets to `http://localhost:8080`. To use the instance from another machine, changing `API_URL` to an address that machine can resolve is not enough: the app encrypts with the Web Crypto API, which browsers only expose on HTTPS pages (`http://localhost` is the one exception). Serve both the web app and the API over HTTPS, for example behind a TLS-terminating reverse proxy, and set `API_URL` to the API's `https://` address; an HTTPS page cannot call an `http://` API. For development, a tunnel that makes the instance reachable as `localhost` on your machine (such as SSH port forwarding of both ports) also works. The [self-hosting guide](https://www.snappwd.io/docs/self-hosting) covers the full stack, and the [snappwd-service README](https://github.com/SnapPwd/snappwd-service#abuse-protection-and-rollout) covers what to configure before exposing an instance publicly.
+
+## Install a pinned version
+
+After cloning both repositories side by side as above, check out their release
+tags before starting the same Compose stack:
+
+```bash
+cd snappwd-service
+git checkout v0.1.0
+cd ../snappwd-web
+git checkout v0.1.0
+docker compose up -d --build
+```
+
+Run these commands from the parent `snappwd-selfhosted` directory. The web and
+service tags are published independently; both `v0.1.0` releases must be available
+before using this example. See [releases](https://github.com/SnapPwd/snappwd-web/releases)
+and the [changelog](CHANGELOG.md) for version notes. These tags pin the application
+source; the existing Compose setup still uses the floating Nginx and Redis images.
 
 ## Features
 
